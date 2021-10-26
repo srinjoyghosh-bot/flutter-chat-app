@@ -6,8 +6,10 @@ class AuthForm extends StatefulWidget {
     String password,
     String username,
     bool isLogin,
+    BuildContext context,
   ) submitFm;
-  AuthForm(this.submitFm);
+  final bool isLoading;
+  AuthForm(this.submitFm,this.isLoading);
 
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -28,7 +30,14 @@ class _AuthFormState extends State<AuthForm> {
       //triggers onsaved in each text form fieeld
       FocusScope.of(context).unfocus();
       //removes soft focus
-      widget.submitFm(_userEmail, _userPassword, _userName, _isLogin);
+      widget.submitFm(
+        _userEmail.trim(),
+        _userPassword.trim(),
+        _userName.trim(),
+        _isLogin,
+        context,
+      );
+      //here context has info about surrounding scaffold
     }
   }
 
@@ -94,10 +103,14 @@ class _AuthFormState extends State<AuthForm> {
                     SizedBox(
                       height: 12,
                     ),
+                    if(widget.isLoading)
+                    CircularProgressIndicator(),
+                    if(!widget.isLoading)
                     RaisedButton(
                       onPressed: _trySubmit,
                       child: Text(_isLogin ? 'Log-In' : 'Sign Up'),
                     ),
+                    if(!widget.isLoading)
                     FlatButton(
                       onPressed: () {
                         setState(() {

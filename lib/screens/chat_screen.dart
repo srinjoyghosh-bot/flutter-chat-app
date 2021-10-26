@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -15,12 +16,45 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('JoyChat'),
+        actions: [
+          DropdownButton(
+            items: [
+              DropdownMenuItem(
+                child: Container(
+                  child: Row(
+                    children: [
+                      Icon(Icons.exit_to_app),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text(('Log Out'))
+                    ],
+                  ),
+                ),
+                value: 'LogOut',
+              ),
+            ],
+            onChanged: (itemIdentifier) {
+              if (itemIdentifier == 'LogOut') {
+                FirebaseAuth.instance.signOut();
+              }
+            },
+            icon: Icon(
+              Icons.more_vert,
+              //3 dots
+              color: Theme.of(context).primaryIconTheme.color,
+            ),
+          )
+        ],
+      ),
       body: StreamBuilder(
         stream: Firestore.instance
             .collection('chats/2biMeARHqi3i239ke6a9/messages')
             .snapshots(),
         builder: (ctx, streamSnapShot) {
-          final documents = streamSnapShot.data.documents;
+          final documents = streamSnapShot.data?.documents;
           if (streamSnapShot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
@@ -51,9 +85,8 @@ class _ChatScreenState extends State<ChatScreen> {
           Firestore.instance
               .collection('chats/2biMeARHqi3i239ke6a9/messages')
               .add({
-                'text':'this was added',
-                
-              });
+            'text': 'this was added',
+          });
         },
       ),
     );
