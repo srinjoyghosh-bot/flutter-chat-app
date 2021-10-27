@@ -1,3 +1,5 @@
+import 'package:chat_app/widgets/chat/messages.dart';
+import 'package:chat_app/widgets/chat/new_message.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +27,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Container(
                   child: Row(
                     children: [
-                      Icon(Icons.exit_to_app),
+                      Icon(
+                        Icons.exit_to_app,
+                        color: Colors.black,
+                      ),
                       SizedBox(
                         width: 8,
                       ),
@@ -49,45 +54,36 @@ class _ChatScreenState extends State<ChatScreen> {
           )
         ],
       ),
-      body: StreamBuilder(
-        stream: Firestore.instance
-            .collection('chats/2biMeARHqi3i239ke6a9/messages')
-            .snapshots(),
-        builder: (ctx, streamSnapShot) {
-          final documents = streamSnapShot.data?.documents;
-          if (streamSnapShot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return ListView.builder(
-            itemBuilder: (ctx, index) => Container(
-              padding: EdgeInsets.all(8),
-              child: Text(documents[index]['text']),
-            ),
-            itemCount: documents.length,
-          );
-          //snapshots returns a stream
-          //stream gives a new value when data changes
-          //this function is reexecuted whenever the stream gives a new value
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          //     .listen((data) {
-          //   data.documents.forEach((element) {
-          //     print(element['text']);
-          //   });
-          // });
-          //snapshots returns a stream
-          //stream emits a new value when data source changes
-          Firestore.instance
-              .collection('chats/2biMeARHqi3i239ke6a9/messages')
-              .add({
-            'text': 'this was added',
-          });
-        },
+      // body: StreamBuilder(
+      //   stream: Firestore.instance
+      //       .collection('chats/2biMeARHqi3i239ke6a9/messages')
+      //       .snapshots(),
+      //   builder: (ctx, streamSnapShot) {
+      //     final documents = streamSnapShot.data?.documents;
+      //     if (streamSnapShot.connectionState == ConnectionState.waiting) {
+      //       return Center(
+      //         child: CircularProgressIndicator(),
+      //       );
+      //     }
+      //     return ListView.builder(
+      //       itemBuilder: (ctx, index) => Container(
+      //         padding: EdgeInsets.all(8),
+      //         child: Text(documents[index]['text']),
+      //       ),
+      //       itemCount: documents.length,
+      //     );
+      //     //snapshots returns a stream
+      //     //stream gives a new value when data changes
+      //     //this function is reexecuted whenever the stream gives a new value
+      //   },
+      // ),
+      body: Container(
+        child: Column(
+          children: [
+            Expanded(child: Messages()),
+            NewMessage(),
+          ],
+        ),
       ),
     );
   }

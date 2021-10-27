@@ -1,8 +1,10 @@
-import 'package:chat_app/widgets/auth_form.dart';
+import 'package:chat_app/widgets/auth/auth_form.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthScreen extends StatefulWidget {
   @override
@@ -17,6 +19,7 @@ class _AuthScreenState extends State<AuthScreen> {
     String email,
     String password,
     String userName,
+    File image,
     bool isLogin,
     BuildContext ctx,
   ) async {
@@ -34,16 +37,29 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         authResult = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_images')
+            .child(authResult.user.uid + '.jpg');
+        //ref gives acces to root cloud storage bucket
+        //this returns a storage reference
+        await ref.putFile(image).onComplete;
+        //putfile returns a storageUploadTask hence takes time
+      final url= await  ref.getDownloadURL();
+      //direct url to image
+
         await Firestore.instance
             .collection('users')
             .document(authResult.user.uid)
-            .setData({
-          'username': userName,
-          'email': email,
-        });
+            .setData(
+          {
+            'username': userName,
+            'email': email,
+            'image_url':url,
+          },
+        );
         //creates users collections on the fly
       }
-
     } on PlatformException catch (err) {
       var message = 'An error occured';
       if (err.message != null) {
@@ -68,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: AuthForm(_submitAuthForm,_isLoading),
+      body: AuthForm(_submitAuthForm, _isLoading),
     );
   }
 }
